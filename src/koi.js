@@ -48,14 +48,14 @@ function makeKoiTexture(variant, seed) {
   } else if(variant.name==='Kin') {
     for(let i=0;i<23;i++)drawPatch(c,65+r()*870,65+r()*390,18+r()*44,14+r()*27,variant.spots[i%3],r,.10);
   } else {
-    const placements=[.18,.32,.48,.63,.78,.87];
+    const placements=[.17,.31,.47,.63,.79,.87];
     placements.forEach((p,i)=>{
-      if(r()<.18)return;
+      if(r()<.13)return;
       const col=variant.spots[i%variant.spots.length];
-      const x=(p+(r()-.5)*.075)*1024;
-      const mid=(.22+r()*.15)*512;
-      drawPatch(c,x,mid,30+r()*57,25+r()*57,col,r,.85+r()*.15);
-      if(r()>.35)drawPatch(c,x+(r()-.5)*49,512-mid,24+r()*50,23+r()*58,col,r,.82);
+      const x=(p+(r()-.5)*.065)*1024;
+      const mid=(.22+r()*.12)*512;
+      drawPatch(c,x,mid,47+r()*62,34+r()*60,col,r,.88+r()*.12);
+      if(r()>.33)drawPatch(c,x+(r()-.5)*39,512-mid,29+r()*61,26+r()*59,col,r,.91);
     });
   }
   // Scale microstructure and fine pigment flecking are intentionally subtle.
@@ -158,6 +158,7 @@ export class Koi {
     for(let i=-2;i<=2;i++)tailPivot.add(lineThrough([[0,0,.005],[-.20,i*.037,.005],[-.50,i*.13,.005]],finVein,.003));
     this.group.add(tailPivot);this.tail=tailPivot;
     // Paired translucent pectoral and pelvic fins.
+    this.pectoralFins=[];
     for(const sign of [-1,1]){
       const p=new THREE.Shape();
       p.moveTo(.38,sign*.14);p.bezierCurveTo(.23,sign*.28,.11,sign*.55,-.18,sign*.62);
@@ -165,6 +166,7 @@ export class Koi {
       const fin=meshFromShape(p,finMat);fin.rotation.x=-Math.PI/2;fin.position.y=-.07;
       // ShapeGeometry is in XY, rotated to sit within XZ.
       this.group.add(fin);
+      this.pectoralFins.push({mesh:fin,sign});
       const pelvic=new THREE.Shape();pelvic.moveTo(-.45,sign*.08);pelvic.quadraticCurveTo(-.58,sign*.34,-.78,sign*.36);pelvic.quadraticCurveTo(-.65,sign*.08,-.45,sign*.08);
       const pelvis=meshFromShape(pelvic,finMat);pelvis.rotation.x=-Math.PI/2;pelvis.position.y=-.13;this.group.add(pelvis);
       const eye=new THREE.Mesh(EYE_GEOMETRY,EYE_MATERIAL);eye.position.set(.66,.11,sign*.145);eye.scale.set(.80,.80,.55);this.group.add(eye);
@@ -226,6 +228,7 @@ export class Koi {
     this.group.rotation.set(Math.sin(time*1.6+this.phase)*.022,this.heading,-pitch);
     this.tail.rotation.y=Math.sin(time*7.3+this.phase)*(.18+(feedTarget?.11:0));
     this.tail.rotation.z=Math.sin(time*7.3+this.phase)*.02;
+    for(const fin of this.pectoralFins)fin.mesh.rotation.y=Math.sin(time*5.1+this.phase+(fin.sign>0?Math.PI:0))*.16;
     if(this.bendUniforms){this.bendUniforms.uKoiPhase.value=time*7.3+this.phase;this.bendUniforms.uKoiBend.value=feedTarget?.15:.105;}
     this.hunger=Math.max(0,this.hunger-dt*.004);
   }

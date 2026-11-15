@@ -15,12 +15,17 @@ function createSandTexture() {
 }
 
 function rockGeometry(radius) {
-  const geo=new THREE.IcosahedronGeometry(radius,1);
+  // Subdivided, slightly weathered river stones instead of visibly faceted rocks.
+  const geo=new THREE.SphereGeometry(radius,24,16);
   const arr=geo.attributes.position;
+  const phase=prng()*Math.PI*2;
   for(let i=0;i<arr.count;i++) {
     const x=arr.getX(i),y=arr.getY(i),z=arr.getZ(i);
-    const n=.85+prng()*.30;
-    arr.setXYZ(i,x*n,y*(.70+prng()*.20),z*n);
+    const a=x/radius,b=y/radius,c=z/radius;
+    const weather=Math.sin(a*6.2+phase)*Math.sin(c*5.8-phase)*.042
+      +Math.cos(b*8.4+c*3.5+phase)*.029;
+    const n=.95+weather;
+    arr.setXYZ(i,x*n,y*(.69+.045*Math.sin(a*4.3+phase))*n,z*(.94+.04*Math.sin(b*3.4))*n);
   }
   geo.computeVertexNormals();return geo;
 }
@@ -99,7 +104,7 @@ export function createAquascape(scene) {
   }
   pebbleMesh.instanceMatrix.needsUpdate=true;pebbleMesh.instanceColor.needsUpdate=true;world.add(pebbleMesh);
   // Larger river stone features, asymmetrically clustered on the left and right.
-  const rockMaterials=['#405b53','#5b6960','#67766c','#314c49','#59655d'].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.94,flatShading:true}));
+  const rockMaterials=['#34473f','#43584a','#4e6053','#2c403b','#53665b'].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:.97,metalness:.01,flatShading:false}));
   const clusters=[[-3.8,-.9,20],[-3.3,1.2,14],[3.7,-1.1,23],[3.9,1.4,12],[-.7,-1.8,7]];
   const rocks=new THREE.Group();rocks.name='River rock formations';world.add(rocks);
   for(const [cx,cz,count] of clusters)for(let i=0;i<count;i++){

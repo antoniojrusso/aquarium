@@ -31,7 +31,8 @@ export class AquariumWorld {
     this.renderer.outputColorSpace=THREE.SRGBColorSpace;
     this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure=1.26;
-    this.renderer.shadowMap.enabled=false;
+    this.renderer.shadowMap.enabled=true;
+    this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,window.innerWidth<850?1.35:1.75));
     this.renderer.domElement.setAttribute('aria-label','Interactive 3D aquarium with swimming koi');
     this.renderer.domElement.tabIndex=0;
@@ -49,8 +50,14 @@ export class AquariumWorld {
     this.ambient=new THREE.AmbientLight('#a1cabe',1.22);this.scene.add(this.ambient);
     this.hemi=new THREE.HemisphereLight('#d5f7e9','#2c493e',1.42);this.scene.add(this.hemi);
     this.sun=new THREE.DirectionalLight('#e7edcf',2.70);this.sun.position.set(-2.5,8,4.3);this.scene.add(this.sun);
+    this.sun.castShadow=true;
+    this.sun.shadow.mapSize.set(window.innerWidth<780?512:1024,window.innerWidth<780?512:1024);
+    this.sun.shadow.camera.left=-6;this.sun.shadow.camera.right=6;
+    this.sun.shadow.camera.top=5;this.sun.shadow.camera.bottom=-5;
+    this.sun.shadow.camera.near=.5;this.sun.shadow.camera.far=19;
+    this.sun.shadow.normalBias=.025;this.sun.shadow.bias=-.00008;
     this.rim=new THREE.DirectionalLight('#79aac0',1.1);this.rim.position.set(4,3,-5);this.scene.add(this.rim);
-    const topFill=new THREE.PointLight('#bfe3d7',12,14,2);topFill.position.set(-1,3.9,-.9);this.scene.add(topFill);
+    const topFill=new THREE.PointLight('#bfe3d7',8,14,2);topFill.position.set(-1,3.9,-.9);this.scene.add(topFill);
     this.topFill=topFill;
     this.aquascape=createAquascape(this.scene);
     this.setLight(this.mood,true);
@@ -70,7 +77,7 @@ export class AquariumWorld {
     this.camera.fov=w<540?49:w<860?45:39;
     this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);
     if(!this.userMoved){
-      this.camera.position.set(0,w<540?4.8:4.7,w<540?14.9:w<860?12.7:11.4);
+      this.camera.position.set(0,w<540?4.8:4.7,w<540?11.2:w<860?12.7:11.4);
       this.controls.target.set(0,1.43,0);
       this.controls.update();
     }
@@ -120,7 +127,7 @@ export class AquariumWorld {
   resetCamera(){
     this.targetLook=null;this.userMoved=false;
     const w=this.mount.clientWidth;
-    this.camera.position.set(0,w<540?4.8:4.7,w<540?14.9:w<860?12.7:11.4);
+    this.camera.position.set(0,w<540?4.8:4.7,w<540?11.2:w<860?12.7:11.4);
     this.controls.target.set(0,1.43,0);this.controls.update();
   }
 
@@ -160,7 +167,7 @@ export class AquariumWorld {
       this.hemi.color.lerp(new THREE.Color(p.ambient),dt*.55);
       this.hemi.intensity=THREE.MathUtils.damp(this.hemi.intensity,p.fill,1.1,dt);
       this.aquascape.setLightStrength(p.beams);
-      this.topFill.intensity=12*p.beams;
+      this.topFill.intensity=8*p.beams;
     }
     this.aquascape.update(this.time,dt);
     for(const pellet of this.food){
