@@ -1,0 +1,10 @@
+{
+  "name": "Stillwater — Living Koi Aquarium",
+  "short_name": "Stillwater",
+  "description": "An interactive virtual koi sanctuary.",
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#06151a",
+  "background_color": "#06151a",
+  "icons": [{"src": "./favicon.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any maskable"}]
+}

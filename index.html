@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#06151a" />
+  <meta name="description" content="Stillwater — an interactive, living 3D koi sanctuary. Watch, care for, and explore a photorealistic virtual aquarium." />
+  <title>STILLWATER — A Living Koi Sanctuary</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div class="app-shell" id="app">
+    <div class="ambient-glow" aria-hidden="true"></div>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="stage" id="stage" aria-label="Interactive three dimensional koi aquarium">
+      <div id="render-target" class="render-target"></div>
+      <div class="stage-vignette" aria-hidden="true"></div>
+      <div class="loading-state" id="loading-state" role="status" aria-live="polite">
+        <div class="loading-ring"></div>
+        <span class="eyebrow">PREPARING YOUR SANCTUARY</span>
+        <p>Let the water settle.</p>
+      </div>
+      <div class="scene-caption" aria-hidden="true"><span class="caption-mark"></span> A WORLD IN MOTION <span class="caption-rule"></span> EST. IN STILLNESS</div>
+    </div>
+
+    <header class="topbar">
+      <div class="brand" aria-label="Stillwater living aquarium">
+        <div class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="brand-lockup"><strong>STILLWATER<span class="brand-period">.</span></strong><small>THE LIVING AQUARIUM</small></div>
+      </div>
+      <div class="topbar-center"><span class="live-dot"></span> YOUR PRIVATE KOI SANCTUARY <span class="topbar-divider"></span> <span id="local-time">DAYLIGHT CYCLE</span></div>
+      <div class="topbar-actions">
+        <button class="quiet-btn desktop-only" id="help-btn" title="How to explore" aria-label="How to explore"><span class="icon-text">?</span><span>GUIDE</span></button>
+        <button class="quiet-btn" id="sound-btn" title="Toggle ambient sound" aria-label="Toggle ambient sound" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6.5 9H3v6h3.5l4.5 4V5Z"/><path class="sound-wave" d="M15 9c1.8 1.7 1.8 4.3 0 6M18 6c3.5 3.1 3.5 8.9 0 12"/></svg><span id="sound-label">SOUND OFF</span></button>
+      </div>
+    </header>
+
+    <aside class="left-panel panel" aria-label="Aquarium controls">
+      <div class="panel-topline"><span class="eyebrow">SANCTUARY / 01</span><span class="panel-ornament">✳</span></div>
+      <h1>A moment of <em>stillness.</em></h1>
+      <p class="panel-intro">A living, breathing underwater world. Slow down. Stay a while.</p>
+      <div class="thin-divider"></div>
+      <div class="control-group">
+        <div class="group-label"><span>ATMOSPHERE</span><span id="light-label">GOLDEN HOUR</span></div>
+        <div class="light-choices" role="group" aria-label="Aquarium lighting">
+          <button class="light-choice" data-light="dawn" aria-label="Dawn lighting" title="Dawn"><span class="light-disc dawn"></span><small>DAWN</small></button>
+          <button class="light-choice active" data-light="day" aria-label="Daylight" aria-pressed="true" title="Day"><span class="light-disc day"></span><small>DAY</small></button>
+          <button class="light-choice" data-light="dusk" aria-label="Dusk lighting" title="Dusk"><span class="light-disc dusk"></span><small>DUSK</small></button>
+          <button class="light-choice" data-light="night" aria-label="Night lighting" title="Night"><span class="light-disc night"></span><small>NIGHT</small></button>
+        </div>
+      </div>
+      <div class="control-group water-group">
+        <div class="group-label"><label for="clarity-input">WATER CLARITY</label><span id="clarity-label">CRYSTAL</span></div>
+        <input id="clarity-input" type="range" min="50" max="100" value="91" aria-label="Water clarity" />
+        <div class="range-ends"><span>NATURAL</span><span>CRYSTAL</span></div>
+      </div>
+      <div class="thin-divider"></div>
+      <div class="care-top"><span class="eyebrow">HABITAT WELLBEING</span><span id="habitat-score">98%</span></div>
+      <div class="care-track" aria-label="Habitat wellbeing"><div id="care-fill"></div></div>
+      <div class="care-line"><span class="care-indicator"></span><span id="care-message">Your koi are thriving.</span></div>
+      <button class="panel-link" id="reset-btn">RESET YOUR VIEW <span aria-hidden="true">↗</span></button>
+    </aside>
+
+    <aside class="right-panel panel" aria-label="Water conditions">
+      <div class="right-head"><span class="eyebrow">LIVE ENVIRONMENT</span><span class="live-indicator"><i></i> OPTIMAL</span></div>
+      <div class="measure"><span class="measure-icon">◌</span><span class="measure-key">WATER TEMP.</span><strong>24.6<span>°C</span></strong></div>
+      <div class="measure"><span class="measure-icon">≈</span><span class="measure-key">PH LEVEL</span><strong>7.2</strong></div>
+      <div class="measure"><span class="measure-icon">✧</span><span class="measure-key">WATER QUALITY</span><strong id="water-quality">98<span>%</span></strong></div>
+      <div class="right-foot">Simulated habitat telemetry</div>
+    </aside>
+
+    <div class="scene-hint" id="scene-hint"><span class="hint-icon">✥</span> DRAG TO EXPLORE <span class="hint-separator">·</span> SCROLL TO ZOOM</div>
+
+    <footer class="bottom-dock panel" aria-label="Koi and aquarium actions">
+      <div class="dock-koi">
+        <div class="dock-heading"><span class="eyebrow">YOUR KOI COLLECTION</span><span class="fish-counter" id="fish-count">04 RESIDENTS</span></div>
+        <div id="fish-roster" class="fish-roster" aria-label="Select a koi to follow"></div>
+      </div>
+      <div class="dock-actions">
+        <button class="action-btn secondary" id="add-fish-btn" title="Introduce a koi"><span class="btn-icon">＋</span><span>ADD KOI</span></button>
+        <button class="action-btn primary" id="feed-btn" title="Feed the koi (F)"><span class="btn-icon">◈</span><span>FEED THE KOI</span><span class="action-key">F</span></button>
+        <button class="action-btn icon-action" id="photo-btn" title="Save aquarium photograph" aria-label="Save aquarium photograph"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l2-2h4l2 2h4v12H4V7Z"/><circle cx="12" cy="13" r="3.25"/></svg></button>
+      </div>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="guide-backdrop" id="guide" hidden>
+      <section class="guide-card" role="dialog" aria-modal="true" aria-labelledby="guide-title">
+        <button class="guide-close" id="close-guide" aria-label="Close guide">×</button>
+        <span class="eyebrow">A LITTLE GUIDE TO STILLWATER</span>
+        <h2 id="guide-title">Nothing to rush.</h2>
+        <p>Explore the habitat by dragging or swiping. Pinch or scroll to move closer. Feed the koi, change the quality of light, or simply watch them find their own rhythm.</p>
+        <div class="guide-grid"><div><span>01</span><strong>WATCH</strong><p>Each koi follows its own path through the water.</p></div><div><span>02</span><strong>CARE</strong><p>Feed the koi and keep the habitat comfortable.</p></div><div><span>03</span><strong>CREATE</strong><p>Change the atmosphere and take a photograph.</p></div></div>
+        <button class="action-btn primary guide-done" id="guide-done">RETURN TO THE WATER <span>↗</span></button>
+      </section>
+    </div>
+  </div>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
